@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>椎間盤分割系統</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- 標題區域 -->
+        <h1>椎間盤辨識系統</h1>
+        
+       
+        
+
+        
+        <!-- 系統說明 -->
+        <p class="description">
+            上傳一張醫學影像，系統將自動進行椎間盤分割分析<br>
+            <small>支援的格式：JPG, PNG, BMP, TIFF 等常見圖片格式</small>
+        </p>
+        
+        <!-- 上傳區域 -->
+        <div class="upload-area">
+            <p>🖼️ 點擊選擇文件或拖拽圖片到此處</p>
+            <input type="file" id="imageInput" accept="image/*" />
+            <br>
+            <button onclick="processImage()" type="button">🔍 開始分析</button>
+        </div>
+        
+        <!-- 載入狀態 -->
+        <div class="loading" id="loading">
+            <p>⏳ 正在處理中，請稍候...</p>
+        </div>
+        
+        <!-- 狀態顯示 -->
+        <div id="status"></div>
+        
+        <!-- 結果顯示區域 -->
+        <div class="results" id="results" style="display: none;">
+            <h2>📊 分析結果</h2>
+            <div class="result-row">
+                <div class="result-item">
+                    <h3>🖼️ 原始圖像</h3>
+                    <img id="originalImg" alt="原始圖像" />
+                </div>
+                <div class="result-item">
+                    <h3>🎯 UNET 語意切割結果</h3>
+                    <img id="firstImg" alt="語意切割結果" />
+                </div>
+                <div class="result-item">
+                    <h3>📈 椎間盤等級分類結果</h3>
+                    <img id="secondImg" alt="等級分類結果" />
+                </div>
+            </div>
+            
+            <!-- 結果說明 -->
+            <div class="explanation">
+                <strong>📋 結果說明：</strong><br>
+                • <strong>UNET 語意切割：</strong>白色區域代表檢測到的椎間盤組織<br>
+                • <strong>椎間盤等級分類：</strong>紅色框標示檢測到的椎間盤位置，包含位置和分類信息<br>
+                • <strong>輸出文件：</strong>分析結果已自動保存為 <code>_result.jpg</code> 和 <code>_result_disc.jpg</code> 文件<br>
+                • <strong>快捷鍵：</strong>Ctrl+Enter 開始分析，Escape 清除狀態訊息
+            </div>
+        </div>
+        
+        <!-- 頁腳 -->
+        <footer style="text-align: center; margin-top: 40px; color: #666; font-size: 12px;">
+            <p>椎間盤分割系統 | 基於深度學習的醫學影像分析 | {{ current_year }}</p>
+        </footer>
+         <!-- 論文資訊區域 -->
+        <div class="paper-info">
+            <strong>📄 相關研究論文：</strong>脊椎MRI影像之椎間盤切割與分類技術（劉曉薇、賴程威）
+        </div>
+
+                <!-- 論文連結 -->
+        <div class="paper-links">
+            <a href="{{ url_for('view_paper') }}" target="_blank">📖 線上閱讀論文</a>
+            <a href="{{ url_for('download_paper') }}" download>📥 下載論文PDF</a>
+        </div>
+        
+        <!-- 醫療小幫手區域 -->
+        <div class="chatbot-section">
+            <h2>🤖 醫療小幫手</h2>
+            <p class="description">
+                有任何關於椎間盤疾病的問題嗎？問問我們的AI醫療小幫手！<br>
+                <small>例如：什麼是椎間盤退化？椎間盤突出的症狀有哪些？</small>
+            </p>
+            
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        👋 您好！我是醫療小幫手，可以回答關於椎間盤疾病的問題。請隨時提問！
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" id="chatInput" placeholder="請輸入您的問題..." />
+                        <button onclick="sendChatMessage()" type="button" id="sendBtn">💬 發送</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- 引入 JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

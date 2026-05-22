@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫療 AI 聊天助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .chat-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .chat-messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+
+        .bot-message {
+            background: white;
+            color: #333;
+            margin-right: auto;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .typing-indicator {
+            background: white;
+            color: #666;
+            margin-right: auto;
+            font-style: italic;
+            border-left: 4px solid #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+
+        .welcome-message {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #1565c0;
+            margin: 0 auto 20px auto;
+            text-align: center;
+            border: 2px solid #2196f3;
+            max-width: 90%;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40,167,69,0.4);
+        }
+
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+            color: #007bff;
+        }
+
+        .status-indicator {
+            text-align: center;
+            padding: 10px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* 動畫效果 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* 滾動條樣式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .chat-messages {
+                height: 400px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 12px 16px;
+            }
+            
+            .chat-input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .chat-input {
+                width: 100%;
+            }
+            
+            .send-button {
+                width: 100%;
+                border-radius: 25px;
+                height: 45px;
+            }
+        }
+
+        /* 連線狀態指示器 */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .connection-online {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-offline {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-circle"></i> 連線中...
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1><i class="fas fa-user-md"></i> 醫療 AI 聊天助手</h1>
+            <div class="chat-subtitle">專業的椎間盤與醫學影像分析諮詢</div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="control-buttons">
+                <button class="control-btn" onclick="resetChat()">
+                    <i class="fas fa-refresh"></i> 重置對話
+                </button>
+                <button class="control-btn" onclick="checkHealth()">
+                    <i class="fas fa-heart"></i> 系統狀態
+                </button>
+                <button class="control-btn" onclick="toggleStream()">
+                    <i class="fas fa-stream"></i> <span id="streamToggleText">串流模式</span>
+                </button>
+                <select class="control-btn" id="conversionSelect" style="padding: 8px 12px;">
+                    <option value="s2tw">簡→繁(台)</option>
+                    <option value="s2t">簡→繁</option>
+                    <option value="s2hk">簡→繁(港)</option>
+                    <option value="t2s">繁→簡</option>
+                    <option value="t2tw">繁→繁(台)</option>
+                    <option value="none">不轉換</option>
+                </select>
+            </div>
+            
+            <div class="status-indicator" id="statusIndicator"></div>
+            
+            <div class="chat-input-group">
+                <input type="text" 
+                       id="chatInput" 
+                       class="chat-input" 
+                       placeholder="請輸入您的醫學問題..."
+                       autocomplete="off">
+                <button id="sendButton" class="send-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message welcome-message">
+                <i class="fas fa-robot"></i>
+                <strong>歡迎使用醫療 AI 聊天助手！</strong><br>
+                我是您的醫學專業助手，專精於椎間盤疾病和醫學影像分析。<br>
+                請隨時詢問相關的醫學問題，我會盡力為您提供專業的解答。
+                <div class="message-time" id="welcomeTime"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 全域變數
+        let isStreamMode = true;
+        let eventSource = null;
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWelcomeTime();
+            checkHealth();
+            setupEventListeners();
+        });
+
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 按下 Enter 鍵發送消息
+            document.getElementById('chatInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // 監聽連線狀態
+            window.addEventListener('online', function() {
+                updateConnectionStatus(true);
+            });
+
+            window.addEventListener('offline', function() {
+                updateConnectionStatus(false);
+            });
+
+            // 初始連線狀態
+            updateConnectionStatus(navigator.onLine);
+        }
+
+        // 更新歡迎時間
+        function updateWelcomeTime() {
+            const now = new Date();
+            document.getElementById('welcomeTime').textContent = 
+                `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        }
+
+        // 更新連線狀態
+        function updateConnectionStatus(isOnline) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (isOnline) {
+                statusEl.className = 'connection-status connection-online';
+                statusEl.innerHTML = '<i class="fas fa-circle"></i> 已連線';
+            } else {
+                statusEl.className = 'connection-status connection-offline';
+                statusEl.innerHTML = '<i class="fas fa-circle"></i> 離線';
+            }
+        }
+
+        // 發送消息
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // 添加用戶消息
+            addMessage(message, 'user');
+            input.value = '';
+
+            // 禁用發送按鈕
+            toggleSendButton(false);
+
+            if (isStreamMode) {
+                sendStreamMessage(message);
+            } else {
+                sendNormalMessage(message);
+            }
+        }
+
+        // 串流模式發送消息
+        function sendStreamMessage(message) {
+            showTypingIndicator();
+            
+            const conversionType = document.getElementById('conversionSelect').value;
+
+            fetch('/chat_stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    message: message,
+                    convert_type: conversionType
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                // 處理 Server-Sent Events 格式的回應
+                const lines = data.split('\n');
+                let botMessage = '';
+                
+                for (let line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const jsonData = JSON.parse(line.substring(6));
+                            if (jsonData.token) {
+                                botMessage += jsonData.token;
+                            } else if (jsonData.response) {
+                                botMessage = jsonData.response;
+                            }
+                        } catch (e) {
+                            console.error('JSON parsing error:', e);
+                        }
+                    }
+                }
+                
+                removeTypingIndicator();
+                if (botMessage) {
+                    addMessage(botMessage, 'bot');
+                } else {
+                    addMessage('抱歉，無法獲取回應。請重試。', 'bot');
+                }
+            })
+            .catch(error => {
+                console.error('Stream error:', error);
+                removeTypingIndicator();
+                addMessage('抱歉，發生錯誤。請檢查網路連線後重試。', 'bot');
+            })
+            .finally(() => {
+                toggleSendButton(true);
+            });
+        }
+
+        // 普通模式發送消息
+        function sendNormalMessage(message) {
+            showTypingIndicator();
+            
+            const conversionType = document.getElementById('conversionSelect').value;
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    message: message,
+                    convert_type: conversionType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeTypingIndicator();
+                if (data.response) {
+                    addMessage(data.response, 'bot');
+                } else if (data.error) {
+                    addMessage(`錯誤：${data.error}`, 'bot');
+                }
+            })
+            .catch(error => {
+                console.error('Chat error:', error);
+                removeTypingIndicator();
+                addMessage('抱歉，發生錯誤。請檢查網路連線後重試。', 'bot');
+            })
+            .finally(() => {
+                toggleSendButton(true);
+            });
+        }
+
+        // 添加消息到聊天區域
+        function addMessage(message, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            
+            messageDiv.innerHTML = `
+                ${message}
+                <div class="message-time">${timeStr}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 顯示打字指示器
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = '<i class="fas fa-ellipsis-h"></i> AI 正在思考中...';
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // 移除打字指示器
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // 切換發送按鈕狀態
+        function toggleSendButton(enabled) {
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = !enabled;
+            sendButton.innerHTML = enabled ? 
+                '<i class="fas fa-paper-plane"></i>' : 
+                '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        // 重置聊天
+        function resetChat() {
+            if (confirm('確定要重置對話嗎？這將清除所有聊天記錄。')) {
+                fetch('/reset_chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 清除聊天記錄
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = `
+                        <div class="message welcome-message">
+                            <i class="fas fa-robot"></i>
+                            <strong>聊天已重置！</strong><br>
+                            您可以開始新的對話了。
+                            <div class="message-time" id="welcomeTime"></div>
+                        </div>
+                    `;
+                    updateWelcomeTime();
+                    showStatus('對話已重置', 'success');
+                })
+                .catch(error => {
+                    console.error('Reset error:', error);
+                    showStatus('重置失敗', 'error');
+                });
+            }
+        }
+
+        // 檢查系統健康狀態
+        function checkHealth() {
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'healthy') {
+                        showStatus(`系統正常 | 聊天機器人: ${data.chatbot_initialized ? '已就緒' : '未初始化'}`, 'success');
+                        updateConnectionStatus(true);
+                    } else {
+                        showStatus('系統異常', 'error');
+                        updateConnectionStatus(false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Health check error:', error);
+                    showStatus('無法連接到服務器', 'error');
+                    updateConnectionStatus(false);
+                });
+        }
+
+        // 切換串流模式
+        function toggleStream() {
+            isStreamMode = !isStreamMode;
+            const toggleText = document.getElementById('streamToggleText');
+            toggleText.textContent = isStreamMode ? '普通模式' : '串流模式';
+            showStatus(`已切換到${isStreamMode ? '串流' : '普通'}模式`, 'info');
+        }
+
+        // 顯示狀態消息
+        function showStatus(message, type) {
+            const statusIndicator = document.getElementById('statusIndicator');
+            statusIndicator.textContent = message;
+            statusIndicator.style.display = 'block';
+            
+            // 根據類型設置顏色
+            statusIndicator.className = 'status-indicator';
+            if (type === 'success') {
+                statusIndicator.style.background = '#d4edda';
+                statusIndicator.style.color = '#155724';
+            } else if (type === 'error') {
+                statusIndicator.style.background = '#f8d7da';
+                statusIndicator.style.color = '#721c24';
+            } else {
+                statusIndicator.style.background = '#e3f2fd';
+                statusIndicator.style.color = '#1565c0';
+            }
+            
+            // 3秒後自動隱藏
+            setTimeout(() => {
+                statusIndicator.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

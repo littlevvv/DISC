@@ -1,0 +1,27 @@
+# Model files
+*.hdf5
+*.h5
+*.pt
+*.pth
+
+# Past/archive directory
+past/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs and temp
+chatlog/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Copilot notes
+copilot.md

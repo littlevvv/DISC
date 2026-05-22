@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫療 AI 整合系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        .features-section {
+            padding: 50px 40px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .feature-button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .feature-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,123,255,0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .system-status {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-online {
+            background-color: #4CAF50;
+        }
+
+        .status-offline {
+            background-color: #f44336;
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: #0056b3;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 20px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .features-section {
+                padding: 30px 20px;
+            }
+            
+            .feature-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-stethoscope"></i> 醫療 AI 整合系統</h1>
+            <p>椎間盤影像分析 × AI醫療助手 × 智能問答</p>
+        </div>
+
+        <div class="features-section">
+            <div class="system-status" id="systemStatus">
+                <h5><i class="fas fa-info-circle"></i> 系統狀態</h5>
+                <div id="statusContent">檢查系統狀態中...</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="fas fa-microscope feature-icon"></i>
+                        </div>
+                        <div class="feature-title">椎間盤影像分析</div>
+                        <div class="feature-description">
+                            使用深度學習 UNET 模型進行醫學影像分割，自動檢測椎間盤位置並進行等級分類。
+                            支援 MRI、CT 等醫學影像格式，提供精確的病理分析結果。
+                        </div>
+                        <div class="text-center">
+                            <a href="/disc_analysis" class="feature-button">
+                                <i class="fas fa-upload"></i> 開始分析
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="fas fa-robot feature-icon"></i>
+                        </div>
+                        <div class="feature-title">AI醫療聊天助手</div>
+                        <div class="feature-description">
+                            專業的醫學 AI 助手，支援椎間盤疾病諮詢、醫學影像分析問答。
+                            整合中文繁簡轉換功能，提供個性化的醫療建議和專業解答。
+                        </div>
+                        <div class="text-center">
+                            <a href="/chat_interface" class="feature-button">
+                                <i class="fas fa-comments"></i> 開始對話
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="feature-card">
+                        <div class="text-center">
+                            <i class="fas fa-file-alt feature-icon"></i>
+                        </div>
+                        <div class="feature-title">醫學論文資源</div>
+                        <div class="feature-description">
+                            提供「脊椎MRI影像之椎間盤切割與分類技術」相關研究論文，
+                            包含完整的技術文檔和研究成果，支援線上閱讀和下載。
+                        </div>
+                        <div class="text-center">
+                            <a href="/view_paper" target="_blank" class="feature-button me-3">
+                                <i class="fas fa-eye"></i> 線上閱讀
+                            </a>
+                            <a href="/paper" class="feature-button">
+                                <i class="fas fa-download"></i> 下載論文
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">2</span>
+                        <div class="stat-label">AI 模型</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">512×512</span>
+                        <div class="stat-label">影像解析度</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">6</span>
+                        <div class="stat-label">中文轉換模式</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">系統可用性</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>技術支援：</strong>
+                深度學習 UNET 模型 | DenseNet121 分類器 | Ollama LLM | zhconv 轉換引擎
+            </p>
+            <p>
+                <a href="/health">系統健康檢查</a> | 
+                <a href="mailto:support@medical-ai.com">技術支援</a> | 
+                <a href="/view_paper" target="_blank">研究文獻</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 頁面載入時檢查系統狀態
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemHealth();
+        });
+
+        // 檢查系統健康狀態
+        function checkSystemHealth() {
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    updateSystemStatus(data);
+                })
+                .catch(error => {
+                    console.error('Health check error:', error);
+                    updateSystemStatus({
+                        status: 'error',
+                        disc_model_loaded: false,
+                        chatbot_initialized: false
+                    });
+                });
+        }
+
+        // 更新系統狀態顯示
+        function updateSystemStatus(data) {
+            const statusContent = document.getElementById('statusContent');
+            let statusHTML = '';
+
+            // 椎間盤模型狀態
+            const discStatus = data.disc_model_loaded ? 'online' : 'offline';
+            const discText = data.disc_model_loaded ? '已載入' : '未載入';
+            statusHTML += `
+                <div class="mb-2">
+                    <span class="status-indicator status-${discStatus}"></span>
+                    椎間盤分析模型: ${discText}
+                </div>
+            `;
+
+            // 等級分類模型狀態
+            const gradeStatus = data.grade_model_loaded ? 'online' : 'offline';
+            const gradeText = data.grade_model_loaded ? '已載入' : '未載入';
+            statusHTML += `
+                <div class="mb-2">
+                    <span class="status-indicator status-${gradeStatus}"></span>
+                    等級分類模型: ${gradeText}
+                </div>
+            `;
+
+            // 聊天機器人狀態
+            const chatStatus = data.chatbot_initialized ? 'online' : 'offline';
+            const chatText = data.chatbot_initialized ? '已就緒' : '未初始化';
+            statusHTML += `
+                <div class="mb-2">
+                    <span class="status-indicator status-${chatStatus}"></span>
+                    AI聊天助手: ${chatText}
+                </div>
+            `;
+
+            // zhconv 狀態
+            const zhconvStatus = data.zhconv_available ? 'online' : 'offline';
+            const zhconvText = data.zhconv_available ? '可用' : '不可用';
+            statusHTML += `
+                <div class="mb-2">
+                    <span class="status-indicator status-${zhconvStatus}"></span>
+                    中文轉換: ${zhconvText}
+                </div>
+            `;
+
+            statusContent.innerHTML = statusHTML;
+        }
+    </script>
+</body>
+</html>
